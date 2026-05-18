@@ -1,24 +1,23 @@
 from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional
+from datetime import datetime
 
 
-# ── JOB SCHEMAS ──────────────────────────────────────────────
+
 
 class JobCreate(BaseModel):
     """Input schema — what the client sends to create a job."""
     title:       str
     description: str
-    location:    Optional[str] = None    # optional — remote jobs have no location
-    salary_min:  Optional[int] = None    # optional — many Indian cos hide salary
+    location:    Optional[str] = None    
+    salary_min:  Optional[int] = None
     salary_max:  Optional[int] = None
     is_remote:   bool = False
-    skills:      list[str] = []           # names — we resolve to IDs in route
+    skills:      list[str] = []
 
     @field_validator('salary_max')
     @classmethod
     def max_above_min(cls, v, info):
-        # info.data holds already-validated fields
-        # salary_min validated first (field order matters in Pydantic v2)
         if v and info.data.get('salary_min') and v < info.data['salary_min']:
             raise ValueError('salary_max must be >= salary_min')
         return v
@@ -33,16 +32,11 @@ class JobResponse(BaseModel):
     salary_max: Optional[int]
     is_remote:  bool
     status:     str
-    # notice: description not here — list view doesn't need it
-    # notice: company_id not here — internal FK, clients don't need raw IDs
-
-
-# ── COMPANY SCHEMAS ──────────────────────────────────────────
 
 class CompanyCreate(BaseModel):
     """Input schema for registering a company."""
     name:    str
-    email:   EmailStr              # pydantic validates email format — pip install pydantic[email]
+    email:   EmailStr
     website: Optional[str] = None
 
 
@@ -52,3 +46,33 @@ class CompanyResponse(BaseModel):
     email:     str
     website:   Optional[str]
     is_active: bool
+
+class Applicantcreate(BaseModel):
+    name:str
+    email:EmailStr
+
+class Applicantresponse(BaseModel):
+    id:int
+    name:str
+    email:str
+    created_at:Optional[datetime]
+
+class Applicationresponse(BaseModel):
+    id:int
+    job_id:int
+    application_id:int
+    status:str
+    applied_at:Optional[datetime]
+    updated_at:Optional[datetime]
+
+class StatusTransitionRequest(BaseModel):
+    status:str
+
+    @field_validator('status')
+    @classmethod
+    def must_be_valid(cls,v):
+        valid={'applied','screening','interview','offer','rejected'}
+
+        if v not in valid:
+            raise ValueError(f"entered status not valid. valid status{valid}")
+        return v

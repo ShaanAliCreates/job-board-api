@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-_pool = None  # module-level singleton — created once, reused forever
+_pool = None 
 
 
 async def get_pool():
@@ -16,19 +16,16 @@ async def get_pool():
             database=os.getenv("DB_NAME", "jobboard"),
             user=os.getenv("DB_USER"),
             password=os.getenv("DB_PASSWORD"),
-            min_size=2,   # keep 2 connections alive even when idle
-            max_size=10   # never open more than 10 simultaneous connections
+            min_size=2,  
+            max_size=10   
         )
     return _pool
 
 
-@asynccontextmanager  # makes this usable with "async with"
+@asynccontextmanager  
 async def get_db():
     pool = await get_pool()
     async with pool.acquire() as conn:
-        # pool.acquire() checks out a connection from the pool
-        # yield passes it to the caller (your route function)
-        # when async with block exits — even on exception —
-        # asyncpg automatically returns the connection to the pool
+       
         yield conn
-         # conn.close() is NOT called — goes back to pool, stays alive
+        
