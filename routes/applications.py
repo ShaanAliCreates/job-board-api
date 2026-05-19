@@ -23,3 +23,5 @@ async def updateStatus(application_id:int,body:StatusTransitionRequest,conn=Depe
     svc=ApplicationService(conn)
     return await svc.transition_state(application_id,body.status)
 
+
+

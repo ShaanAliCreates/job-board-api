@@ -76,3 +76,36 @@ class StatusTransitionRequest(BaseModel):
         if v not in valid:
             raise ValueError(f"entered status not valid. valid status{valid}")
         return v
+    
+
+# here is the model related to my analytics __________________________
+class HiringVelocityItem(BaseModel):
+    company:str
+    job_count:int
+    rank:int
+    contriPercentage:float
+    class config:
+        from_attributes=True
+
+
+class TopSkillItem(BaseModel):
+    skill:str
+    job_count:int
+    rank:int
+
+    class config:
+        from_attributes=True
+
+
+class FunnelItems(BaseModel):
+    status:str
+    count:int
+    conversion_pct:float
+    running_total:int
+
+    class config:
+        from_attributes=True
+    
+
+
+#analytics model end here _________________________________
