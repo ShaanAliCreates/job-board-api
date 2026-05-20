@@ -109,3 +109,20 @@ class FunnelItems(BaseModel):
 
 
 #analytics model end here _________________________________
+
+
+#-------------------here is our job item used for demostrating the cursor
+class CursorJobItem(BaseModel):
+    id:int
+    title:str
+    location:Optional[str]
+    comapny_name:Optional[str]
+    create_at:Optional[datetime]
+
+    class config:
+        from_attributes=True
+    
+class cursorResponse(BaseModel):
+    jobs:list[cursorResponse]
+    next_cursor:Optional[str]
+    has_more:bool

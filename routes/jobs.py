@@ -1,8 +1,10 @@
 from fastapi import APIRouter,Depends,HTTPException
-from models import JobCreate
+from models import JobCreate,cursorResponse
 from dependencies import get_conn,get_company_or_404
 from typing import Optional
+from datetime import datetime
 import asyncpg
+import base64
 
 router=APIRouter(prefix="/jobs",tags=["jobs"])
 
@@ -120,4 +122,41 @@ async def deletejob(job_id:int,conn=Depends(get_conn)):
     if row == "UPDATE 0"or"update 0"or"Update 0":
         raise HTTPException(status_code=404,detail="job not found or already closed")
     
+
+@router.get("/cursor",response_model=cursorResponse)
+async def list_job_cursor(cursor:Optional[int]=None,limit:int=20,status:str='active',conn=Depends(get_conn)):
+
+    if cursor:
+        try:
+            decode=base64.b64decode(cursor).decode
+            cursor_time= datetime.fromisoformat(decode)
+
+        except Exception:
+            raise HTTPException(status_code=400,detail="cursor is invalid")
+        
+        rows= await conn.fetch("select j.id,j.title,j.location,c.name,j.created_at from jobs j join companies c on "
+                               "j.company_id=c.id where status=$1 and j.created_at < $2 order by j.created_at desc limit $3",status,cursor,limit+1)
+
+
+    else:
+        rows= await conn.fetch("select j.id,j.title,j.location,c.name,j.created_at from jobs j join companies c on "
+                               "j.company_id=c.id where status=$1  order by j.created_at desc limit $2",status,limit+1)
+        
+
+    items= [dict(row) for row in rows]
+    has_more=len(items)>limit
+
+    if has_more:
+        items=items[:limit]
+
+    next_cursor=None
+
+    if items and has_more:
+        last_ts=items[-1]['created_at'].isoformat()
+        next_cursor=base64.b64decode(last_ts.encode()).decode
     
+    return{
+        "items":items,
+        "next_cursor":next_cursor,
+        "has_more":has_more
+    }
