@@ -5,6 +5,8 @@ from typing import Optional
 from datetime import datetime
 import asyncpg
 import base64
+from exceptions import JobNotFoundError
+
 
 router=APIRouter(prefix="/jobs",tags=["jobs"])
 
@@ -86,7 +88,7 @@ async def getjob(job_id:int,conn=Depends(get_conn)):
                              "from jobs j join companies c on j.company_id=c.id left join job_skills js on j.id=js.job_id "
                              "left join skills s on js.skill_id=s.id where j.id=$1 group by j.id,c.name",job_id)
     if not row:
-        raise HTTPException(status_code=404,detail="Job details not found,Enter a valid job id")
+        raise JobNotFoundError(job_id)
     return dict(row)
 
 @router.get("/",status_code=200)
@@ -162,4 +164,4 @@ async def deletejob(job_id:int,conn=Depends(get_conn)):
     row= await conn.execute("update jobs set status='inactive' where status='active' and id=$1",job_id)
 
     if row == "UPDATE 0"or"update 0"or"Update 0":
-        raise HTTPException(status_code=404,detail="job not found or already closed")
+        raise JobNotFoundError(job_id)

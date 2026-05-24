@@ -7,11 +7,9 @@ router=APIRouter(prefix="/companies",tags=["companies"])
 
 @router.post("/",status_code=201)
 async def createcompany(data:CompanyCreate,conn=Depends(get_conn)):
-    try:
-        row=await conn.fetchrow("insert into companies(name,email,website) values($1,$2,$3) returning *",data.name,data.email,data.website)
-        return dict(row)
-    except asyncpg.UniqueViolationError:
-        raise HTTPException(status_code=409,detail="Email is already registered,user another one")
+
+    row=await conn.fetchrow("insert into companies(name,email,website) values($1,$2,$3) returning *",data.name,data.email,data.website)
+    return dict(row)
     
 
 @router.get("/{company_id}",status_code=200)

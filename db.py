@@ -7,7 +7,6 @@ load_dotenv()
 
 _pool = None 
 
-
 async def get_pool():
     global _pool
     if _pool is None:
@@ -22,7 +21,7 @@ async def get_pool():
     return _pool
 
 
-@asynccontextmanager  
+@asynccontextmanager 
 async def get_db():
     pool = await get_pool()
     async with pool.acquire() as conn:

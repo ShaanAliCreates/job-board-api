@@ -1,5 +1,6 @@
 from fastapi import HTTPException
 import asyncpg
+from exceptions import ApplicationNotFoundError,DuplicateApplicationError,InvalidTranstionError,JobNotActiveError,NoJobs
 
 valid_transition={
     "applied":["screening","rejected"],
@@ -19,14 +20,11 @@ class ApplicationService:
         job= await self.conn.fetchrow("select * from jobs where status='active' and id=$1",job_id)
 
         if not job or job['status']!='active':
-            raise HTTPException(status_code=404,detail="Job is closed or not found")
+            raise JobNotActiveError()
         
-        try:
-           row= await self.conn.fetchrow("insert into applications(applicant_id,job_id) values($1,$2) returning *",applicant_id,job_id)
+        
+        row= await self.conn.fetchrow("insert into applications(applicant_id,job_id) values($1,$2) returning *",applicant_id,job_id)
 
-        except asyncpg.UniqueViolationError:
-            raise HTTPException(status_code=409,detail="already applied for the job")
-        
         return dict(row)
     
 
@@ -36,13 +34,13 @@ class ApplicationService:
         app= await self.conn.fetchrow("select * from applications where id=$1",application_id)
 
         if not app:
-            raise HTTPException(status_code=404,detail="application not found")
+            raise ApplicationNotFoundError(application_id)
         
         current=app['status']
         allowed=valid_transition.get(current,[])
 
         if new_state not in allowed:
-            raise HTTPException(status_code=400,detail=(f"cannot transition'{current}'-> '{new_state}'"f"   valid transition '{current}': '{allowed}' "))
+            raise InvalidTranstionError(current,new_state,allowed)
         
         row=await self.conn.fetchrow("update applications set status =$1,update_at=now() where id=$2 returning *",new_state,application_id)
 
@@ -53,7 +51,7 @@ class ApplicationService:
         row=await self.conn.fetchrow("select a.*,j.title,ap.name,ap.email from applications a join jobs j on a.job_id=j.id join applicants ap on a.applicant_id=ap.id where a.id=$1",application_id )
         
         if not row:
-            raise HTTPException(status_code=404,details="application not found")
+            raise ApplicationNotFoundError(application_id)
 
         return dict(row)
         

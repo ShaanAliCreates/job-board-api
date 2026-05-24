@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 import asyncpg
-
+from exceptions import JobNotFoundError,NoJobs
 class analyticsService:
     def __init__(self,conn:asyncpg.connection):
         self.conn=conn
@@ -10,7 +10,7 @@ class analyticsService:
         jobs=await self.conn.fetch("with recentjobs as (select company_id,count(*) as total_jobs from jobs where status='active' and created_at > now() - interval '1 day' * $1 group by company_id) select c.name,rj.total_jobs,rank() over(order by total_jobs desc),round(rj.total_jobs*100/sum(rj.total_jobs) over(),2) as contriPercentage from recentjobs rj join companies c on rj.company_id=c.id ",days)
         
         if not jobs:
-            raise HTTPException(status_code=404,detail="No jobs is founds within {days} days")
+            raise NoJobs()
         return [dict(job) for job in jobs]
     
     async def topSkills(self,limit:int):
@@ -21,7 +21,7 @@ class analyticsService:
                                     "from allskills group by skillName limit $1",limit)
         
         if not jobs:
-            raise HTTPException(status_code=404,detail="No jobs founds")
+            raise NoJobs
         
         return [dict(job) for job in jobs]
     
@@ -32,6 +32,6 @@ class analyticsService:
                                    "order by aps.count desc ")
         
         if not jobs:
-            raise HTTPException(status_code=404,detail="No jobs founds")
+            raise NoJobs
         
         return [dict(job) for job in jobs]
