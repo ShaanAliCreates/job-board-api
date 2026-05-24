@@ -1,3 +1,21 @@
+Run locally (2 commands)
+
+git clone https://github.com/ShaanAliCreates/job-board-api
+
+cd job-board-api
+
+docker compose up --build
+
+- API: http://localhost:8000
+- DOCS: http://localhost:8000/docs
+- DB: localhost:5433 (user:postgres,db:jobboard)
+
+requirements: DOCKER + DOCKER COMPOSE
+
+Migartion run automatically on first start.
+Data remain persistent across restart. 'docker compose down -v ' for wiping data.
+
+
 # job-board-api
 this repository contains my project named job board api
 

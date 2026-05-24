@@ -1,8 +1,8 @@
 __pycache__
 *.pyc
-.env
-.git
 *.md
-venv/
+.env
 .venv/
+venv/
+.git
 migrations/versions/*.pyc

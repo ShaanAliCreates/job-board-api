@@ -84,7 +84,7 @@ class HiringVelocityItem(BaseModel):
     job_count:int
     rank:int
     contriPercentage:float
-    class config:
+    class Config:
         from_attributes=True
 
 
@@ -93,7 +93,7 @@ class TopSkillItem(BaseModel):
     job_count:int
     rank:int
 
-    class config:
+    class Config:
         from_attributes=True
 
 
@@ -103,7 +103,7 @@ class FunnelItems(BaseModel):
     conversion_pct:float
     running_total:int
 
-    class config:
+    class Config:
         from_attributes=True
     
 
@@ -116,13 +116,13 @@ class CursorJobItem(BaseModel):
     id:int
     title:str
     location:Optional[str]
-    comapny_name:Optional[str]
-    create_at:Optional[datetime]
+    company_name:Optional[str]
+    created_at:Optional[datetime]
 
-    class config:
+    class Config:
         from_attributes=True
     
-class cursorResponse(BaseModel):
-    jobs:list[cursorResponse]
+class CursorResponse(BaseModel):
+    jobs:list[CursorJobItem]
     next_cursor:Optional[str]
     has_more:bool
