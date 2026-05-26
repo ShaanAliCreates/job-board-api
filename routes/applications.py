@@ -1,4 +1,4 @@
-from fastapi import APIRouter,HTTPException,Depends
+from fastapi import APIRouter,Depends
 from models import StatusTransitionRequest
 from dependencies import get_conn
 from services.applications import ApplicationService

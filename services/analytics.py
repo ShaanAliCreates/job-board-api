@@ -1,6 +1,9 @@
-from fastapi import HTTPException
+
 import asyncpg
 from exceptions import JobNotFoundError,NoJobs
+import logging
+
+logger=logging.getLogger(__name__)
 class analyticsService:
     def __init__(self,conn:asyncpg.connection):
         self.conn=conn
@@ -21,7 +24,7 @@ class analyticsService:
                                     "from allskills group by skillName limit $1",limit)
         
         if not jobs:
-            raise NoJobs
+            raise NoJobs()
         
         return [dict(job) for job in jobs]
     
@@ -32,6 +35,6 @@ class analyticsService:
                                    "order by aps.count desc ")
         
         if not jobs:
-            raise NoJobs
+            raise NoJobs()
         
         return [dict(job) for job in jobs]

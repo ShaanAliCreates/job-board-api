@@ -9,7 +9,7 @@ class CompanyNotFoundError(JobBoardException):
         super().__init__(f"company {company_id} not found", status_code=404)
 
 class JobNotFoundError(JobBoardException):
-    def __init__(self,job_id:int=None):
+    def __init__(self,job_id:int):
         super().__init__(f"Job with id {job_id} not found",404)
 
 
@@ -41,6 +41,10 @@ class JobNotActiveError(JobBoardException):
 class NoJobs(JobBoardException):
     def __init__(self):
         super().__init__("No jobs found",404)
+
+class InvalidCursor(JobBoardException):
+    def __init__(self):
+        super().__init__("Cursor is invalid",404)
 
     
 

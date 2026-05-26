@@ -6,7 +6,7 @@ from datetime import datetime
 
 
 class JobCreate(BaseModel):
-    """Input schema — what the client sends to create a job."""
+    
     title:       str
     description: str
     location:    Optional[str] = None    
@@ -24,7 +24,7 @@ class JobCreate(BaseModel):
 
 
 class JobResponse(BaseModel):
-    """Output schema — what the API returns. Never expose raw DB rows."""
+    
     id:         int
     title:      str
     location:   Optional[str]
@@ -33,8 +33,19 @@ class JobResponse(BaseModel):
     is_remote:  bool
     status:     str
 
+
+class filterData(BaseModel):
+    location:Optional[str]=None
+    is_remote:Optional[bool]=None
+    salary_min:Optional[int]=None
+    salary_max:Optional[int]=None
+    skills:Optional[str]=None
+    status:str='active'
+    skip: int=0
+    limit:int=10
+
 class CompanyCreate(BaseModel):
-    """Input schema for registering a company."""
+    
     name:    str
     email:   EmailStr
     website: Optional[str] = None
@@ -114,9 +125,10 @@ class FunnelItems(BaseModel):
 #-------------------here is our job item used for demostrating the cursor
 class CursorJobItem(BaseModel):
     id:int
+    company_name:Optional[str]
     title:str
     location:Optional[str]
-    company_name:Optional[str]
+    is_remote:bool
     created_at:Optional[datetime]
 
     class Config:

@@ -1,7 +1,7 @@
-from fastapi import HTTPException
 import asyncpg
-from exceptions import ApplicationNotFoundError,DuplicateApplicationError,InvalidTranstionError,JobNotActiveError,NoJobs
-
+from exceptions import ApplicationNotFoundError,DuplicateApplicationError,InvalidTranstionError,JobNotActiveError,NoJobs,ApplicantNotFoundError
+import logging
+logger=logging.getLogger(__name__)
 valid_transition={
     "applied":["screening","rejected"],
     "screening":["interview","rejected"],
@@ -18,9 +18,12 @@ class ApplicationService:
 
     async def apply(self,job_id:int,applicant_id:int):
         job= await self.conn.fetchrow("select * from jobs where status='active' and id=$1",job_id)
+        applicant= await self.conn.fetchrow("select * from applicants where  id=$1",applicant_id)
 
         if not job or job['status']!='active':
             raise JobNotActiveError()
+        if not applicant:
+            raise ApplicantNotFoundError(applicant_id)
         
         
         row= await self.conn.fetchrow("insert into applications(applicant_id,job_id) values($1,$2) returning *",applicant_id,job_id)
