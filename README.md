@@ -1,4 +1,31 @@
-Run locally (2 commands)
+# Job-board-api
+
+Production grade job listing platform built with FastAPI + PostgrSQL. Build within 14 days.
+
+First request after sleep takes 30-60 seconds (cold start)
+## Live demo
+- API: https://job-board-api-1-0ry8.onrender.com
+- DOCS: https://job-board-api-1-0ry8.onrender.com/docs
+
+**Layer rules enforced:**
+- Routes: parse request, call service, return — zero SQL
+- Services: business logic + SQL — zero HTTP code
+- Typed exceptions in services, HTTP handlers in main.py
+
+---
+
+## Tech Stack
+
+|Layer | Technology |
+
+| API | FastAPI + Pydantic v2 |
+| DB driver | asyncpg (async, no ORM) |
+| Database | PostgreSQL 16 |
+| Migrations | Alembic |
+| Local dev | Docker Compose |
+| Deploy | Render.com| 
+
+### Run locally (2 commands)
 
 git clone https://github.com/ShaanAliCreates/job-board-api
 
@@ -15,11 +42,24 @@ requirements: DOCKER + DOCKER COMPOSE
 Migartion run automatically on first start.
 Data remain persistent across restart. 'docker compose down -v ' for wiping data.
 
+## Features
 
-# job-board-api
-this repository contains my project named job board api
+- Job CRUD with many-to-many skills (ON CONFLICT upsert)
+- Company registration with FK-linked jobs
+- Application state machine: applied → screening → interview → offer
+- Dynamic job filtering: location, salary range, skills, remote, status
+- Cursor-based pagination (O(log n) vs offset O(n))
+- Analytics endpoints: hiring velocity, top skills, application funnel
+- Window functions: RANK() OVER, SUM() OVER, CTEs
+- Request logging middleware with duration
+- Global exception handlers with typed errors
 
-++++++++++++++Pagination Design+++++++++++++++++++++++++++
+
+
+
+## Key Engineering Decisions
+
+# Pagination Design
 
 This api implements cursor based pagination method for job feed
 ('/job/cursor') instead of tradation offset method.
@@ -52,3 +92,40 @@ In of ('/jobs/cursor') I return{
 
 }
 
+
+### asyncpg over SQLAlchemy ORM
+Raw asyncpg gives full SQL control. Every query is intentional.
+Connection pooling: min=2, max=10. Context manager pattern prevents leaks.
+
+### Transactions for multi-step writes
+Job creation (insert job + link skills) wrapped in a transaction.
+Partial failure impossible — either all succeed or none do.
+
+### Composite indexes
+```sql
+CREATE INDEX idx_jobs_status_created ON jobs(status, created_at DESC);
+```
+Covers both the status filter and created_at ordering in a single index scan.
+
+
+## Project Structure
+
+```
+job-board-api/
+├── main.py          # app, middleware, exception handlers
+├── db.py            # asyncpg connection pool
+├── models.py        # Pydantic request/response schemas
+├── exceptions.py    # typed domain exceptions
+├── dependencies.py  # FastAPI Depends() providers
+├── services/        # business logic + SQL (no HTTP)
+│   ├── jobs.py
+│   ├── companies.py
+│   ├── applications.py
+│   └── analytics.py
+├── routes/          # thin HTTP handlers (no SQL)
+│   ├── jobs.py
+│   ├── companies.py
+│   ├── applications.py
+│   └── analytics.py
+└── migrations/      # Alembic migration files
+```
