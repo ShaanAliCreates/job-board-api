@@ -21,7 +21,7 @@ services:
           name: jobboard-db
           property: user
 
-      - Key: DB_PASSWORD
+      - key: DB_PASSWORD
         fromDatabase:
           name: jobboard-db
           property: password
