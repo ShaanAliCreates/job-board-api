@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: job-board-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: bash startup.sh
+    envVars:
+      - key: DB_HOST
+        fromDatabase:
+          name: jobboard-db
+          property: host
+
+
+      - key: DB_NAME
+        fromDatabase:
+          name: jobboard-db
+          property: database
+
+      - key: DB_USER
+        fromDatabase:
+          name: jobboard-db
+          property: user
+
+      - Key: DB_PASSWORD
+        fromDatabase:
+          name: jobboard-db
+          property: password
+
+      - key: DB_PORT
+        fromDatabase:
+          name: jobboard-db
+          property: port 
+databases:
+  - name: jobboard-db
+    plan: free

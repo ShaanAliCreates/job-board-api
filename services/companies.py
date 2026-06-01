@@ -17,6 +17,8 @@ class companyService:
                      "order by created_at "
                      "limit $1 offset $2",limit,skip
                      )
-        return [dict(r) for r in rows]
+        return{
+            "rows":[dict(r) for r in rows]
+            }
 
 

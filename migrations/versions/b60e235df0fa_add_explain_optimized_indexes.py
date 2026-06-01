@@ -21,7 +21,7 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     op.create_index('idx_jobs_status_created','jobs',['status','created_at'])
     op.create_index('idx_jobs_location','jobs',['location'])
-    op.create_index('idx_jobs_active_created','jobs',['created_at'],postgresql_where=sa.text("where status='active'"))
+    op.create_index('idx_jobs_active_created','jobs',['created_at'],postgresql_where=sa.text("status='active'"))
 
 
 

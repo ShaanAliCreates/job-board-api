@@ -29,7 +29,7 @@ class JobServices:
         
     
     async def getJobId(self,job_id:int)->dict:
-        row = await self.conn.fetchrow("select c.name,j.*,coalesce(ARRAY_AGG(s.name),ARRAY[]::text[]) as skills from jobs j join companies c on j.company_id=c.id left join job_skills js on j.id=js.job_id left join skills s on js.skill_id=s.id where job_id=$1 and status='active' group by j.id,c.name",job_id)
+        row = await self.conn.fetchrow("select c.name as company_name,j.*,coalesce(ARRAY_AGG(s.name),ARRAY[]::text[]) as skills from jobs j join companies c on j.company_id=c.id left join job_skills js on j.id=js.job_id left join skills s on js.skill_id=s.id where job_id=$1 and status='active' group by j.id,c.name",job_id)
         if not row:
             raise JobNotFoundError(job_id)
         return dict(row)
@@ -76,7 +76,7 @@ class JobServices:
 
         count_sql=f"select count(distinct j.id) from jobs j join companies c on j.company_id=c.id where {where_clause}{skillFilter}"
 
-        data_sql=f"select j.id,j.title,j.location,j.salary_min,j.salary_max,j.is_remote,c.name,coalesce(array_agg(distinct s.name),array[]::text[]) from jobs j join companies c on j.company_id=c.id left join job_skills js on js.job_id=j.id left join skills s on js.skill_id=s.id where {where_clause} {skillFilter} group by j.id,j.title,j.location,j.salary_min,j.salary_max,j.is_remote,c.name order by j.created_at limit ${param_count+1} offset ${param_count+2}"
+        data_sql=f"select j.id,j.title,j.location,j.salary_min,j.salary_max,j.is_remote,c.name as company_name,coalesce(array_agg(distinct s.name),array[]::text[]) as skills from jobs j join companies c on j.company_id=c.id left join job_skills js on js.job_id=j.id left join skills s on js.skill_id=s.id where {where_clause} {skillFilter} group by j.id,j.title,j.location,j.salary_min,j.salary_max,j.is_remote,c.name order by j.created_at limit ${param_count+1} offset ${param_count+2}"
 
         total= await self.conn.fetchval(count_sql,*params)
         rows=await self.conn.fetch(data_sql,*params,data.limit,data.skip)

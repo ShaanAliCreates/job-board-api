@@ -32,6 +32,27 @@ class JobResponse(BaseModel):
     salary_max: Optional[int]
     is_remote:  bool
     status:     str
+    skills:Optional[list[str]]
+
+
+class GetListIdResponse(BaseModel):
+    id:int
+    company_name:Optional[str]
+    title:str
+    location:Optional[str]
+    salary_min:Optional[int]
+    salary_max:Optional[int]
+    is_remote:bool
+    skills:list[str]
+
+    class Config:
+        from_attributes=True
+    
+class GetListResponse(BaseModel):
+    items:list[GetListIdResponse]
+    total:int
+    limit:int
+    offset:int
 
 
 class filterData(BaseModel):
@@ -58,6 +79,9 @@ class CompanyResponse(BaseModel):
     website:   Optional[str]
     is_active: bool
 
+class CompanyListResponse(BaseModel):
+    rows:Optional[list[CompanyResponse]]
+
 class Applicantcreate(BaseModel):
     name:str
     email:EmailStr
@@ -71,10 +95,10 @@ class Applicantresponse(BaseModel):
 class Applicationresponse(BaseModel):
     id:int
     job_id:int
-    application_id:int
+    applicant_id:int
     status:str
     applied_at:Optional[datetime]
-    updated_at:Optional[datetime]
+    update_at:Optional[datetime]
 
 class StatusTransitionRequest(BaseModel):
     status:str
@@ -91,12 +115,14 @@ class StatusTransitionRequest(BaseModel):
 
 # here is the model related to my analytics __________________________
 class HiringVelocityItem(BaseModel):
-    company:str
-    job_count:int
+    name:str
+    total_jobs:int
     rank:int
-    contriPercentage:float
+    contripercentage:float
     class Config:
         from_attributes=True
+class HiringVelocityResponse(BaseModel):
+    jobs:list[HiringVelocityItem]
 
 
 class TopSkillItem(BaseModel):
@@ -106,7 +132,8 @@ class TopSkillItem(BaseModel):
 
     class Config:
         from_attributes=True
-
+class TopSkillResponse(BaseModel):
+    jobs:list[TopSkillItem]
 
 class FunnelItems(BaseModel):
     status:str
@@ -116,6 +143,10 @@ class FunnelItems(BaseModel):
 
     class Config:
         from_attributes=True
+
+class FunnelResponse(BaseModel):
+    jobs:list[FunnelItems]
+    
     
 
 
