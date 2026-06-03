@@ -19,12 +19,14 @@ class ApplicationService:
     async def apply(self,job_id:int,applicant_id:int):
         job= await self.conn.fetchrow("select * from jobs where status='active' and id=$1",job_id)
         applicant= await self.conn.fetchrow("select * from applicants where  id=$1",applicant_id)
-
         if not job or job['status']!='active':
             raise JobNotActiveError()
         if not applicant:
             raise ApplicantNotFoundError(applicant_id)
         
+        application= await self.conn.fetchrow("select * from applications where job_id=$1 and applicant_id=$2",job_id,applicant_id)
+        if application:
+            raise DuplicateApplicationError()
         
         row= await self.conn.fetchrow("insert into applications(applicant_id,job_id) values($1,$2) returning *",applicant_id,job_id)
 

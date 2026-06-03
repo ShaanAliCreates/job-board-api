@@ -23,6 +23,7 @@ def upgrade() -> None:
                     sa.Column('id',sa.Integer(), primary_key=True),
                     sa.Column('name',sa.String(100), nullable=False)
                     )
+    op.create_unique_constraint("skills_name_key","skills",["name"])
     
 
     op.create_table('job_skills',

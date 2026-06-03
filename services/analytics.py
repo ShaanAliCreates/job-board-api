@@ -12,8 +12,7 @@ class analyticsService:
     async def hiring_velocity(self,days:int):
         jobs=await self.conn.fetch("with recentjobs as (select company_id,count(*) as total_jobs from jobs where status='active' and created_at > now() - interval '1 day' * $1 group by company_id) select c.name,rj.total_jobs,rank() over(order by total_jobs desc) as rank,round(rj.total_jobs*100/sum(rj.total_jobs) over(),2) as contriPercentage from recentjobs rj join companies c on rj.company_id=c.id ",days)
         
-        if not jobs:
-            raise NoJobs()
+        
         return{
             "jobs":[dict(job) for job in jobs]
             }
@@ -25,8 +24,7 @@ class analyticsService:
                                     "select skillName as skill,count(distinct jobId) as job_count,rank() over(order by count(distinct jobId) desc) as rank "
                                     "from allskills group by skillName limit $1",limit)
         
-        if not jobs:
-            raise NoJobs()
+        
         
         return{
             "jobs":[dict(job) for job in jobs]
@@ -38,8 +36,6 @@ class analyticsService:
                                     "select aps.status as status,aps.count as count,round(aps.count*100/t.total,2) as conversion_pct,sum(aps.count) over(order by aps.count desc)::int as running_total from appStatus aps,totalcount t "
                                    "order by aps.count desc ")
         
-        if not jobs:
-            raise NoJobs()
         
         return{
             "jobs":[dict(job) for job in jobs]}
