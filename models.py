@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, EmailStr, field_validator,ConfigDict
 from typing import Optional
 from datetime import datetime
 
@@ -27,26 +27,33 @@ class JobResponse(BaseModel):
     
     id:         int
     title:      str
+    company_id: int
+    description: Optional[str]
     location:   Optional[str]
     salary_min: Optional[int]
     salary_max: Optional[int]
+    created_at: Optional[datetime]
     is_remote:  bool
-    status:     str
+    status: str
     skills:Optional[list[str]]
+    
 
 
 class GetListIdResponse(BaseModel):
     id:int
     company_name:Optional[str]
+    company_id: Optional[int]
     title:str
+    description: Optional[str]
     location:Optional[str]
     salary_min:Optional[int]
     salary_max:Optional[int]
     is_remote:bool
+    status: Optional[str]
     skills:list[str]
+    created_at: Optional[datetime]
 
-    class Config:
-        from_attributes=True
+    model_config=ConfigDict(extra="forbid")
     
 class GetListResponse(BaseModel):
     items:list[GetListIdResponse]
@@ -119,8 +126,8 @@ class HiringVelocityItem(BaseModel):
     total_jobs:int
     rank:int
     contripercentage:float
-    class Config:
-        from_attributes=True
+    model_config=ConfigDict(extra="forbid")
+
 class HiringVelocityResponse(BaseModel):
     jobs:list[HiringVelocityItem]
 
@@ -130,8 +137,8 @@ class TopSkillItem(BaseModel):
     job_count:int
     rank:int
 
-    class Config:
-        from_attributes=True
+    model_config=ConfigDict(extra="forbid")
+
 class TopSkillResponse(BaseModel):
     jobs:list[TopSkillItem]
 
@@ -141,8 +148,8 @@ class FunnelItems(BaseModel):
     conversion_pct:float
     running_total:int
 
-    class Config:
-        from_attributes=True
+    model_config=ConfigDict(extra="forbid")
+
 
 class FunnelResponse(BaseModel):
     jobs:list[FunnelItems]
@@ -162,8 +169,8 @@ class CursorJobItem(BaseModel):
     is_remote:bool
     created_at:Optional[datetime]
 
-    class Config:
-        from_attributes=True
+    model_config=ConfigDict(extra="forbid")
+
     
 class CursorResponse(BaseModel):
     jobs:list[CursorJobItem]

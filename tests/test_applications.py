@@ -4,7 +4,7 @@ def _apply(client,job_id:int,applicant_id:int):
     return client.post(f"/applications/?job_id={job_id}&applicant_id={applicant_id}")
 
 def _transtion(client,application_id:int,status:str):
-    return client.patch(f"/applications/{application_id}/status",json={"status":status})
+    return client.patch(f"/applications/{application_id}",json={"status":status})
 
 
 def test_apply_success(client):
@@ -29,11 +29,11 @@ def test_valid_transition_applied_to_screening(client):
     co=make_company(client)
     job=make_job(client,co["id"])
     appli=make_applicant(client)
-    application=_apply(client,job["id"],appli["id"]).json
+    application=_apply(client,job["id"],appli["id"]).json()
 
     r=_transtion(client,application["id"],"screening")
-    assert r.status_code==200
-    assert r.json()["status"]=="applied"
+    assert r.status_code==201
+    assert r.json()["status"]=="screening"
 
 def test_invalid_transition_applied_to_offer(client):
     co=make_company(client)
@@ -63,11 +63,11 @@ def test_terminal_state_rejected(client):
 def test_closed_job(client):
     co=make_company(client)
     job=make_job(client,co["id"])
-    client.delete(f"/job/{job['id']}")
+    client.delete(f"/jobs/{job['id']}")
     applicant=make_applicant(client)
 
     r=_apply(client,job["id"],applicant["id"])
-    assert r.status_code==404
-    assert r.json()["type"]=="JobNotFoundError"
+    assert r.status_code==400
+    assert r.json()["type"]=="JobNotActiveError"
 
 

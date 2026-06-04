@@ -6,11 +6,11 @@ def test_create_company_success(client):
     data = r.json()
     assert data ["name"]=="testComp"
     assert "id" in data
-    assert data["status"]=="active"
+    assert data["is_active"]==True
 
 
 def test_create_company_duplicate_email(client):
-    make_company("testComp","test01@gmail.com")
+    make_company(client,"testComp","test01@gmail.com")
     r=client.post("/companies/",json={"name":"testComp2","email":"test01@gmail.com"})
     assert r.status_code==409
     assert "error" in r.json()
@@ -28,7 +28,7 @@ def test_company_pagination_list(client):
     for i in range(5):
         make_company(client,name=f"co{i}",email=f"co{i}@gmail.com")
 
-    r=client.get("/compaies/?limit=2&skip=0")
+    r=client.get("/companies/?limit=2&skip=0")
     assert r.status_code==200
-    assert len(r.json())==2
+    assert len(r.json()["rows"])==2
     

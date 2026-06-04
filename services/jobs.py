@@ -36,7 +36,7 @@ class JobServices:
 
 
     async def deleteJob(self,job_id:int)->dict:
-        row= await self.conn.execute("update jobs set status='inactivte' where id=$1 and status='active'",job_id)
+        row= await self.conn.execute("update jobs set status='inactive' where id=$1 and status='active' returning id",job_id)
 
         if row=="UPDATE 0":
             raise JobNotFoundError(job_id)

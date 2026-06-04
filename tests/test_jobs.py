@@ -22,7 +22,7 @@ def test_job_with_skills(client):
     r=client.get(f"/jobs/{job['id']}")
     assert r.status_code==200
     data=r.json()
-    assert data["name"]=="testcomp"
+    assert data["title"]=="Engineer"
     assert "python" in data["skills"]
     
 def test_get_job_not_found(client):

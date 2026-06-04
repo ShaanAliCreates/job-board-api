@@ -12,7 +12,7 @@ async def get_pool():
     if _pool is None:
         _pool = await asyncpg.create_pool(
             host=os.getenv("DB_HOST", "localhost"),
-            database=os.getenv("DB_NAME", "jobboard"),
+            database=os.getenv("DB_NAME", "jobboard_test"),
             user=os.getenv("DB_USER"),
             password=os.getenv("DB_PASSWORD"),
             min_size=2,  
