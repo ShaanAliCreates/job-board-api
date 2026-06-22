@@ -24,7 +24,7 @@ def upgrade() -> None:
     op.create_index('idx_jobs_created_at','jobs',['created_at'])
 
     op.create_index('idx_applications_job_id','applications',['job_id'])
-    op.create_index('idx_applications_skill_id','applications',['skill_id'])
+    op.create_index('idx_applications_skill_id','applications',['applicant_id'])
     op.create_index('idx_applications_status','applications',['status'])
 
 def downgrade() -> None:

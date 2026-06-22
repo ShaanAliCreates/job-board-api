@@ -26,7 +26,7 @@ def upgrade() -> None:
                     sa.Column('status',sa.String(20),server_default='applied'),
                     sa.Column('applied_at',sa.TIMESTAMP(), server_default=sa.text('Now()')),
                     sa.Column('update_at',sa.TIMESTAMP(),server_default=sa.text('NOW()')),
-                    sa.UniqueConstraint('job_id','skill_id',name='uq_jobId_skillId')
+                    sa.UniqueConstraint('job_id','applicant_id',name='uq_jobId_applicant_id')
                     )
 
 
