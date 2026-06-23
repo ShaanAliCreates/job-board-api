@@ -1,34 +1,60 @@
 from fastapi import Depends,HTTPException,status
-from fastapi.security import OAuth2PasswordBearer
-from datetime import datetime,timezone,timedelta
-import os
-from dependencies import get_conn
+from fastapi.security import OAuth2PassBearer
 from jose import JWTError,jwt
 from passlib.context import CryptContext
+from dependencies import get_conn
+from datetime import datetime,timedelta,timezone
+import os
 
-SECRET_KEY = os.getenv("SECRET_KEY","")
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-REFRESH_TOKEN_EXPIRE_DAYS = 7 
 
-pwd_context = CryptContext(schemes=["bcrypt"],deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+SECRET_KEY=os.getenv("SECRET_KEY","")
+ALGORITHM="HS256"
+ACCESS_TOKEN_LIMIT_IN_MINUTES=30
+REFRESH_TOKEN_LIMIT_IN_DAYS=7
 
-def hash_password(password:str)->str:
+
+pwd_context= CryptContext(schemes=["bcrypt"],deprecated="auto")
+OAuth2_schema= OAuth2PassBearer(tokenUrl="/auth/login")
+
+def password_hash(password:str)->str:
     return pwd_context.hash(password)
 
-def verify_password(plain:str,hashed:str)->bool:
-    return pwd_context.verify(plain,hashed)
+def verify(plain:str,hash:str)->bool:
+    return pwd_context.verify(plain,hash)
 
-
-def create_access_token(data:dict)->str:
+def create_access_token(data:dict):
     payload=data.copy()
-    payload["exp"]=datetime.now(timezone.utc)+timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    payload["exp"]=datetime.now(timezone.utc)+timedelta(minutes=ACCESS_TOKEN_LIMIT_IN_MINUTES)
     payload["type"]="access"
     return jwt.encode(payload,SECRET_KEY,algorithm=ALGORITHM)
 
-def create_refresh_token(data:dict)->str:
+
+def create_refresh_token(data:dict):
     payload=data.copy()
-    payload["exp"]=datetime.now(timezone.utc)+timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+    payload["exp"]=datetime.now(timezone.utc)+timedelta(days=REFRESH_TOKEN_LIMIT_IN_DAYS)
     payload["type"]="refresh"
     return jwt.encode(payload,SECRET_KEY,algorithm=ALGORITHM)
+
+
+def decode_token(token:str)->str:
+    try:
+        return jwt.decode(token,SECRET_KEY,algorithms=ALGORITHM)
+    except JWTError:
+        return HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or experied token",
+            headers={"www-Authenticate":"Bearer"}
+        )
+    
+async def get_current_applicant(token:str=Depends(OAuth2_schema),conn=Depends(get_conn)):
+    payload=decode_token(token)
+    if payload.get("type") != "access":
+        raise HTTPException(status_code=401,detail="Use access token not refresh token")
+    
+    row = await conn.fetchrow("select id,name,email from applicant where id=$1 and is_active=True",int(payload["sub"]))
+
+    if not row:
+        raise HTTPException(status_code=401,detail="Applicant not found or deactivated")
+    
+    return dict(row)
+    
