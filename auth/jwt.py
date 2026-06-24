@@ -1,5 +1,5 @@
 from fastapi import Depends,HTTPException,status
-from fastapi.security import OAuth2PassBearer
+from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError,jwt
 from passlib.context import CryptContext
 from dependencies import get_conn
@@ -7,14 +7,14 @@ from datetime import datetime,timedelta,timezone
 import os
 
 
-SECRET_KEY=os.getenv("SECRET_KEY","")
+SECRET_KEY=os.getenv("SECRET_KEY","ddf2eb01c084017375f8819692557b7d5c73a6cc16becb32536b60c22c852fa1")
 ALGORITHM="HS256"
 ACCESS_TOKEN_LIMIT_IN_MINUTES=30
 REFRESH_TOKEN_LIMIT_IN_DAYS=7
 
 
 pwd_context= CryptContext(schemes=["bcrypt"],deprecated="auto")
-OAuth2_schema= OAuth2PassBearer(tokenUrl="/auth/login")
+OAuth2_schema= OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 def password_hash(password:str)->str:
     return pwd_context.hash(password)
@@ -51,7 +51,7 @@ async def get_current_applicant(token:str=Depends(OAuth2_schema),conn=Depends(ge
     if payload.get("type") != "access":
         raise HTTPException(status_code=401,detail="Use access token not refresh token")
     
-    row = await conn.fetchrow("select id,name,email from applicant where id=$1 and is_active=True",int(payload["sub"]))
+    row = await conn.fetchrow("select id,name,email from applicants where id=$1 and is_active=True",int(payload["sub"]))
 
     if not row:
         raise HTTPException(status_code=401,detail="Applicant not found or deactivated")

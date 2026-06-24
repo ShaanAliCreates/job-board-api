@@ -60,6 +60,8 @@ class GetListResponse(BaseModel):
     total:int
     limit:int
     offset:int
+    model_config=ConfigDict(extra="forbid")
+
 
 
 class filterData(BaseModel):
@@ -176,3 +178,26 @@ class CursorResponse(BaseModel):
     jobs:list[CursorJobItem]
     next_cursor:Optional[str]
     has_more:bool
+
+
+# JWT authentication related model below ----------------------------
+
+class ApplicantRegister(BaseModel):
+    name:str
+    email:EmailStr
+    password:str
+
+    @field_validator('password')
+    @classmethod
+    def password_strength(cls,v):
+        if len(v)<8:
+            raise ValueError("Password must be at least of 8 character")
+        
+        return v
+    
+
+class Token_Response(BaseModel):
+    access_token:str
+    type:str
+    refresh_token:Optional[str]=None
+    

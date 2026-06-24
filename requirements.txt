@@ -33,6 +33,7 @@ pytest==9.0.3
 pytest-asyncio==1.4.0
 python-dotenv==1.2.2
 python-jose==3.5.0
+python-multipart==0.0.32
 rsa==4.9.1
 six==1.17.0
 SQLAlchemy==2.0.49

@@ -5,6 +5,7 @@ import time
 import asyncpg
 
 
+from routes.auth import router as auth_router
 from routes.companies import router as companyRouter
 from routes.jobs import router as jobRouter
 from routes.applicants import router as applicantRouter
@@ -16,7 +17,7 @@ logging.basicConfig(level=logging.INFO,format="%(asctime)s | %(levelname)s | %(n
 logger=logging.getLogger(__name__)
 
 
-app=FastAPI(title="Job board api",version="11.0")
+app=FastAPI(title="Job board api",version="12.0")
 
 
 #-----here is middleware of my app
@@ -59,6 +60,7 @@ app.include_router(jobRouter)
 app.include_router(applicantRouter)
 app.include_router(appRouter)
 app.include_router(analyticsRouter)
+app.include_router(auth_router)
 @app.get("/health")
 async def gethealth():
-    return {"status":"ok","version":"11.0"}
+    return {"status":"ok","version":"12.0"}

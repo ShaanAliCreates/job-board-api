@@ -76,7 +76,37 @@ class JobServices:
 
         count_sql=f"select count(distinct j.id) from jobs j join companies c on j.company_id=c.id where {where_clause}{skillFilter}"
 
-        data_sql=f"select j.id,j.title,j.location,j.salary_min,j.salary_max,j.is_remote,c.name as company_name,coalesce(array_agg(distinct s.name),array[]::text[]) as skills from jobs j join companies c on j.company_id=c.id left join job_skills js on js.job_id=j.id left join skills s on js.skill_id=s.id where {where_clause} {skillFilter} group by j.id,j.title,j.location,j.salary_min,j.salary_max,j.is_remote,c.name order by j.created_at limit ${param_count+1} offset ${param_count+2}"
+        data_sql = f"""
+    SELECT
+        j.id,
+        j.title,
+        j.location,
+        j.salary_min,
+        j.salary_max,
+        j.is_remote,
+        j.company_id,
+        j.description,
+        j.status,
+        j.created_at,
+        c.name AS company_name,
+        COALESCE(
+            array_agg(DISTINCT s.name) FILTER (WHERE s.name IS NOT NULL),
+            array[]::text[]
+        ) AS skills
+    FROM jobs j
+    JOIN companies c ON j.company_id = c.id
+    LEFT JOIN job_skills js ON js.job_id = j.id
+    LEFT JOIN skills s ON js.skill_id = s.id
+    WHERE {where_clause} {skillFilter}
+    GROUP BY
+        j.id, j.title, j.location,
+        j.salary_min, j.salary_max,
+        j.is_remote, j.company_id,
+        j.description, j.status, j.created_at,
+        c.name
+    ORDER BY j.created_at
+    LIMIT ${param_count + 1} OFFSET ${param_count + 2}
+"""
 
         total= await self.conn.fetchval(count_sql,*params)
         rows=await self.conn.fetch(data_sql,*params,data.limit,data.skip)
