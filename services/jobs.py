@@ -29,7 +29,7 @@ class JobServices:
         
     
     async def getJobId(self,job_id:int)->dict:
-        row = await self.conn.fetchrow("select c.name as company_name,j.*,coalesce(ARRAY_AGG(s.name),ARRAY[]::text[]) as skills from jobs j join companies c on j.company_id=c.id left join job_skills js on j.id=js.job_id left join skills s on js.skill_id=s.id where job_id=$1 and status='active' group by j.id,c.name",job_id)
+        row = await self.conn.fetchrow("select c.name as company_name,j.*,coalesce(ARRAY_AGG(s.name) filter(where s.name is not null),ARRAY[]::text[]) as skills from jobs j join companies c on j.company_id=c.id left join job_skills js on j.id=js.job_id left join skills s on js.skill_id=s.id where j.id=$1 and j.status='active' group by j.id,c.name",job_id)
         if not row:
             raise JobNotFoundError(job_id)
         return dict(row)

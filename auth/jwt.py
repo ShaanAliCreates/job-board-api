@@ -14,7 +14,7 @@ REFRESH_TOKEN_LIMIT_IN_DAYS=7
 
 
 pwd_context= CryptContext(schemes=["bcrypt"],deprecated="auto")
-OAuth2_schema= OAuth2PasswordBearer(tokenUrl="/auth/login")
+OAuth2_schema= OAuth2PasswordBearer(tokenUrl="/auth/login",scheme_name="ApplicantAuth")
 
 def password_hash(password:str)->str:
     return pwd_context.hash(password)
@@ -40,7 +40,7 @@ def decode_token(token:str)->str:
     try:
         return jwt.decode(token,SECRET_KEY,algorithms=ALGORITHM)
     except JWTError:
-        return HTTPException(
+        raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or experied token",
             headers={"www-Authenticate":"Bearer"}

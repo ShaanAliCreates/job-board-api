@@ -13,6 +13,7 @@ from routes.applications import router as appRouter
 from routes.analytics import router as analyticsRouter
 from exceptions import JobBoardException
 
+
 logging.basicConfig(level=logging.INFO,format="%(asctime)s | %(levelname)s | %(name)s | %(message)s")
 logger=logging.getLogger(__name__)
 

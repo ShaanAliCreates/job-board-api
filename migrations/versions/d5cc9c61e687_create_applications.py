@@ -22,7 +22,7 @@ def upgrade() -> None:
     op.create_table('applications',
                     sa.Column('id',sa.Integer(), primary_key=True),
                     sa.Column('job_id',sa.Integer(), sa.ForeignKey('jobs.id', ondelete='CASCADE')),
-                    sa.Column('applicant_id',sa.Integer(),sa.ForeignKey('skills.id',ondelete='CASCADE')),
+                    sa.Column('applicant_id',sa.Integer(),sa.ForeignKey('applicants.id',ondelete='CASCADE')),
                     sa.Column('status',sa.String(20),server_default='applied'),
                     sa.Column('applied_at',sa.TIMESTAMP(), server_default=sa.text('Now()')),
                     sa.Column('update_at',sa.TIMESTAMP(),server_default=sa.text('NOW()')),

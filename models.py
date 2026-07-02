@@ -79,6 +79,7 @@ class CompanyCreate(BaseModel):
     name:    str
     email:   EmailStr
     website: Optional[str] = None
+    password: Optional[str] = None
 
 
 class CompanyResponse(BaseModel):
