@@ -71,7 +71,7 @@ async def company_register(data:CompanyCreate,conn=Depends(get_conn)):
 
 @router.post("/company_login")
 async def company_login(form:OAuth2PasswordRequestForm=Depends(),conn=Depends(get_conn)):
-    row = await conn.fetchval("select id,email,password_hash from companies where email=$1 and is_active=true",form.username)
+    row = await conn.fetchrow("select id,email,password_hash from companies where email=$1 and is_active=true",form.username)
     if not row or not verify(form.password,row['password_hash']):
         raise HTTPException(status_code=401,detail="Invalid credentials")
     
